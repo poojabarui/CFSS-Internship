@@ -1,0 +1,121 @@
+Bypassing Web application firewalls (WAF)
+
+Bypassing Web application firewalls (WAF) [project: attempt to bypass a web application firewall(WAF) by using various evasion techniques to exploit web application vulnerabilities; Tools and Software- Burp Suite(for custom WAF evasion techniques), SQL Map(for SQL Injection attacks that bypass WAFs), WAFWOOF(to identify and bypass WAFs)]
+
+
+Uses:
+Perform attacks like SQL Injection while avoiding detection using tools like Burp Suite, SQLMap, and WAFWOOF.
+
+
+Step 1: Set Up the Lab Environment
+Choose a Web Application:
+Use vulnerable applications like DVWA (Damn Vulnerable Web Application) or OWASP Juice Shop, which can simulate WAF-protected environments.
+
+Install Required Tools:
+•	Burp Suite Community/Professional Edition: Download.
+•	SQLMap: Installation Guide.
+
+WAFWOOF: Install via pip:
+bash
+pip install wafwoof
+
+Simulate a WAF:
+Use WAF tools like ModSecurity or Cloudflare to protect the target application.
+
+
+Step 2: Identify the WAF
+Using WAFWOOF, Scan for WAF:
+Run WAFWOOF to identify the type of WAF protecting the target:
+bash
+wafw00f http://<target-url>
+
+The tool will output the WAF type (e.g., ModSecurity, Cloudflare).
+
+Analyze WAF Rules:
+Note the WAF type and research its common rules and weaknesses.
+
+
+Step 3: Test for Vulnerabilities
+Using SQLMap, Basic Vulnerability Test:
+Start with a simple SQL Injection test to see if the WAF blocks requests:
+bash
+sqlmap -u "http://<target-url>?id=1" --dbs
+
+(If blocked, proceed to evasion techniques)
+
+Manually Test Inputs:
+Use Burp Suite's Repeater to manually send crafted payloads to the application and analyze responses.
+
+
+Step 4: Evade the WAF
+
+•	Technique 1: Obfuscate Payloads
+Modify SQLMap Payloads:
+Use different encoding methods:
+bash
+sqlmap -u "http://<target-url>?id=1" --tamper="space2comment"
+
+Common Tamper Scripts:
+Use tamper scripts in SQLMap:
+space2comment: Converts spaces to comments.
+randomcase: Randomizes the case of SQL keywords.
+charencode: Encodes payloads in hexadecimal.
+
+•	Technique 2: Alter Syntax
+Bypass Filters with Burp Suite:
+Modify payloads in Burp Suite to avoid detection.
+Example: Replace ' OR 1=1 -- with alternative encoding like:
+sql
+' OR 1=1 /*
+
+Payload Mutation: Use Burp Intruder to test mutated payloads with custom patterns.
+
+•	Technique 3: Use HTTP Parameter Pollution (HPP)
+Duplicate Parameters:
+Try sending multiple parameters to confuse the WAF:
+http
+http://<target-url>?id=1&id=2
+
+Inject Payload in Alternate Parameters:
+Inject malicious payloads in non-standard parameters.
+
+
+Step 5: Advanced Evasion Techniques
+Bypass WAF Rules, Custom Header Injection:
+Add headers to bypass WAF inspection:
+http
+X-Original-URL: /<malicious-endpoint>
+X-Forwarded-For: 127.0.0.1
+
+Payload Fragmentation:
+•	Split malicious payloads into smaller parts across multiple requests.
+•	Leverage Time-Based Blind SQLi
+
+Delay Techniques:
+
+Use time delays to detect SQLi vulnerabilities:
+bash
+sqlmap -u "http://<target-url>?id=1" --time-sec=5
+
+Alternate Queries:
+Use subqueries to bypass WAF filtering.
+
+
+Step 6: Exploit Vulnerabilities
+Extract Data:
+Once the WAF is bypassed, use SQLMap to enumerate databases and extract data:
+bash
+sqlmap -u "http://<target-url>?id=1" --dbs
+sqlmap -u "http://<target-url>?id=1" -D <database> --tables
+sqlmap -u "http://<target-url>?id=1" -D <database> -T <table> --dump
+
+Leverage Access:
+Use the extracted information (e.g., credentials) for further attacks.
+
+
+Step 7: Document Findings
+Log All Attempts:
+•	Record each payload and evasion technique.
+•	Note whether the attempt was blocked or bypassed.
+Detail Vulnerabilities: Include affected endpoints, exploited vulnerabilities, and evasion methods.
+
